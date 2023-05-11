@@ -20,8 +20,6 @@ namespace Minitimer {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 var f = new Form1();
-                // in case system dpi is bugged, resize correctly
-                f.Size = f.LogicalToDeviceUnits(f.Size);
                 var currentScreen = Screen.FromControl(f);
                 var realX = currentScreen.WorkingArea.Width - f.Width - f.LogicalToDeviceUnits(8);
                 var realY = currentScreen.WorkingArea.Height - f.Height - f.LogicalToDeviceUnits(8);
