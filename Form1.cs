@@ -1,3 +1,4 @@
+using Minitimer.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -35,7 +36,9 @@ namespace Minitimer {
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e) {
+            Settings.Default.Save();
             Deactivate -= Form1_Deactivate;
+            Hide();
         }
 
         private void OnMouseDoubleClick(object sender, MouseEventArgs e) {
@@ -62,6 +65,9 @@ namespace Minitimer {
                 label1.Text = "00:00";
                 timer1.Stop();
                 SystemSounds.Beep.Play();
+                if (Settings.Default.CloseOnFinish) {
+                    Close();
+                }
             }
         }
 
@@ -73,6 +79,10 @@ namespace Minitimer {
             if (e.KeyCode == Keys.Escape) {
                 Close();
             }
+        }
+
+        private void closeOnFinishToolStripMenuItem_CheckedChanged(object sender, EventArgs e) {
+            Settings.Default.CloseOnFinish = closeOnFinishToolStripMenuItem.Checked;
         }
     }
 }
