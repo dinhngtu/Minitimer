@@ -3,19 +3,40 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Media;
+using System.Reflection.Emit;
+using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
 namespace Minitimer {
     public partial class Form1 : Form {
         DateTime Deadline { get; set; } = DateTime.MinValue;
+        string TimeLabel { get; set; } = "00:00";
+
+        Font TextFont;
+        readonly BufferedGraphicsContext graphicsContext = BufferedGraphicsManager.Current;
+        BufferedGraphics graphics = null;
 
         public Form1() {
             InitializeComponent();
+            SetStyle(ControlStyles.UserPaint, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            UpdateFont();
+            RepositionForm();
+            RecreateBuffer();
+        }
+
+        private void RepositionForm() {
+            var currentScreen = Screen.FromControl(this);
+            var realX = currentScreen.WorkingArea.Width - Width - LogicalToDeviceUnits(8);
+            var realY = currentScreen.WorkingArea.Height - Height - LogicalToDeviceUnits(8);
+            Location = new Point(realX, realY);
         }
 
         private void OnMouseDown(object sender, MouseEventArgs e) {
@@ -56,17 +77,29 @@ namespace Minitimer {
             DoUpdate();
         }
 
+        private void PaintTimer(string value) {
+            graphics.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            graphics.Graphics.FillRectangle(SystemBrushes.Control, 0, 0, Width, Height);
+            graphics.Graphics.DrawString(value, TextFont, SystemBrushes.ControlText, 0, 0);
+            graphics.Render(Graphics.FromHwnd(Handle));
+            //Refresh();
+        }
+
         private void DoUpdate() {
             var now = DateTime.Now;
             if (Deadline > now) {
                 var rem = TimeSpan.FromSeconds(Math.Ceiling((Deadline - now).TotalSeconds));
-                label1.Text = rem.ToString("mm\\:ss");
+                TimeLabel = rem.ToString("mm\\:ss");
+                PaintTimer(TimeLabel);
             } else {
-                label1.Text = "00:00";
-                timer1.Stop();
-                SystemSounds.Beep.Play();
-                if (Settings.Default.CloseOnFinish) {
-                    Close();
+                TimeLabel = "00:00";
+                PaintTimer(TimeLabel);
+                if (timer1.Enabled) {
+                    timer1.Stop();
+                    SystemSounds.Beep.Play();
+                    if (Settings.Default.CloseOnFinish) {
+                        Close();
+                    }
                 }
             }
         }
@@ -83,6 +116,34 @@ namespace Minitimer {
 
         private void closeOnFinishToolStripMenuItem_CheckedChanged(object sender, EventArgs e) {
             Settings.Default.CloseOnFinish = closeOnFinishToolStripMenuItem.Checked;
+        }
+
+        private void Form1_Resize(object sender, EventArgs e) {
+            RecreateBuffer();
+            DoUpdate();
+        }
+
+        private void RecreateBuffer() {
+            // Re-create the graphics buffer for a new window size.
+            graphicsContext.MaximumBuffer = new Size(this.Width + 1, this.Height + 1);
+            if (graphics != null) {
+                graphics.Dispose();
+                graphics = null;
+            }
+            graphics = graphicsContext.Allocate(this.CreateGraphics(), new Rectangle(0, 0, this.Width, this.Height));
+        }
+
+        private void Form1_Paint(object sender, PaintEventArgs e) {
+            PaintTimer(TimeLabel);
+        }
+
+        private void Form1_DpiChanged(object sender, DpiChangedEventArgs e) {
+            UpdateFont();
+        }
+
+        private void UpdateFont() {
+            TextFont = new Font(FontFamily.GenericSansSerif, 48.0f * this.DeviceDpi / 96.0f, GraphicsUnit.Point);
+            Size = SizeFromClientSize(Graphics.FromHwnd(Handle).MeasureString(TimeLabel, TextFont).ToSize());
         }
     }
 }

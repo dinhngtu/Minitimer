@@ -19,12 +19,7 @@ namespace Minitimer {
                 }
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                var f = new Form1();
-                var currentScreen = Screen.FromControl(f);
-                var realX = currentScreen.WorkingArea.Width - f.Width - f.LogicalToDeviceUnits(8);
-                var realY = currentScreen.WorkingArea.Height - f.Height - f.LogicalToDeviceUnits(8);
-                f.Location = new Point(realX, realY);
-                Application.Run(f);
+                Application.Run(new Form1());
             }
         }
     }
