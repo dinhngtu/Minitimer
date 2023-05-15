@@ -17,7 +17,9 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 namespace Minitimer {
     public partial class Form1 : Form {
         DateTime Deadline { get; set; } = DateTime.MinValue;
-        string TimeLabel { get; set; } = "00:00";
+
+        const string DefaultTimeLabel = "00:00";
+        string TimeLabel { get; set; } = DefaultTimeLabel;
 
         Font TextFont;
         readonly BufferedGraphicsContext graphicsContext = BufferedGraphicsManager.Current;
@@ -78,9 +80,10 @@ namespace Minitimer {
         }
 
         private void PaintTimer(string value) {
+            graphics.Graphics.FillRectangle(SystemBrushes.ControlText, 0, 0, Width, Height);
+            graphics.Graphics.FillRectangle(SystemBrushes.Control, 2, 2, Width - 4, Height - 4);
             graphics.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-            graphics.Graphics.FillRectangle(SystemBrushes.Control, 0, 0, Width, Height);
-            graphics.Graphics.DrawString(value, TextFont, SystemBrushes.ControlText, 0, 0);
+            graphics.Graphics.DrawString(value, TextFont, SystemBrushes.ControlText, 2, 2);
             graphics.Render(Graphics.FromHwnd(Handle));
             //Refresh();
         }
@@ -92,7 +95,7 @@ namespace Minitimer {
                 TimeLabel = rem.ToString("mm\\:ss");
                 PaintTimer(TimeLabel);
             } else {
-                TimeLabel = "00:00";
+                TimeLabel = DefaultTimeLabel;
                 PaintTimer(TimeLabel);
                 if (timer1.Enabled) {
                     timer1.Stop();
@@ -143,7 +146,10 @@ namespace Minitimer {
 
         private void UpdateFont() {
             TextFont = new Font(FontFamily.GenericSansSerif, 48.0f * this.DeviceDpi / 96.0f, GraphicsUnit.Point);
-            Size = SizeFromClientSize(Graphics.FromHwnd(Handle).MeasureString(TimeLabel, TextFont).ToSize());
+            var contentSize = Graphics.FromHwnd(Handle).MeasureString(TimeLabel, TextFont).ToSize();
+            contentSize.Width += 4;
+            contentSize.Height += 4;
+            Size = SizeFromClientSize(contentSize);
         }
     }
 }

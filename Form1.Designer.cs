@@ -40,26 +40,26 @@
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 54);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(201, 74);
             // 
             // closeOnFinishToolStripMenuItem
             // 
             this.closeOnFinishToolStripMenuItem.Checked = global::Minitimer.Properties.Settings.Default.CloseOnFinish;
             this.closeOnFinishToolStripMenuItem.CheckOnClick = true;
             this.closeOnFinishToolStripMenuItem.Name = "closeOnFinishToolStripMenuItem";
-            this.closeOnFinishToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.closeOnFinishToolStripMenuItem.Size = new System.Drawing.Size(200, 32);
             this.closeOnFinishToolStripMenuItem.Text = "Close on &finish";
             this.closeOnFinishToolStripMenuItem.CheckedChanged += new System.EventHandler(this.closeOnFinishToolStripMenuItem_CheckedChanged);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(197, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(200, 32);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -71,9 +71,9 @@
             // Form1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.ClientSize = new System.Drawing.Size(300, 300);
             this.ContextMenuStrip = this.contextMenuStrip1;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.ShowInTaskbar = false;
