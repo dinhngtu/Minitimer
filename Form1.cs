@@ -18,8 +18,21 @@ namespace Minitimer {
     public partial class Form1 : Form {
         DateTime Deadline { get; set; } = DateTime.MinValue;
 
+
         const string DefaultTimeLabel = "00:00";
         string TimeLabel { get; set; } = DefaultTimeLabel;
+
+        float TextFontSize {
+            get {
+                return 48.0f * DeviceDpi / 96.0f;
+            }
+        }
+
+        int BorderSize {
+            get {
+                return (int)Math.Ceiling(2.0f * DeviceDpi / 96.0f);
+            }
+        }
 
         Font TextFont;
         readonly BufferedGraphicsContext graphicsContext = BufferedGraphicsManager.Current;
@@ -81,9 +94,9 @@ namespace Minitimer {
 
         private void PaintTimer(string value) {
             graphics.Graphics.FillRectangle(SystemBrushes.ControlText, 0, 0, Width, Height);
-            graphics.Graphics.FillRectangle(SystemBrushes.Control, 2, 2, Width - 4, Height - 4);
+            graphics.Graphics.FillRectangle(SystemBrushes.Control, BorderSize, BorderSize, Width - BorderSize * 2, Height - BorderSize * 2);
             graphics.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-            graphics.Graphics.DrawString(value, TextFont, SystemBrushes.ControlText, 2, 2);
+            graphics.Graphics.DrawString(value, TextFont, SystemBrushes.ControlText, BorderSize, BorderSize);
             graphics.Render(Graphics.FromHwnd(Handle));
             //Refresh();
         }
@@ -145,10 +158,10 @@ namespace Minitimer {
         }
 
         private void UpdateFont() {
-            TextFont = new Font(FontFamily.GenericSansSerif, 48.0f * this.DeviceDpi / 96.0f, GraphicsUnit.Point);
+            TextFont = new Font(FontFamily.GenericSansSerif, TextFontSize, GraphicsUnit.Point);
             var contentSize = Graphics.FromHwnd(Handle).MeasureString(TimeLabel, TextFont).ToSize();
-            contentSize.Width += 4;
-            contentSize.Height += 4;
+            contentSize.Width += BorderSize * 2;
+            contentSize.Height += BorderSize * 2;
             Size = SizeFromClientSize(contentSize);
         }
     }
