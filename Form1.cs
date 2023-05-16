@@ -77,14 +77,22 @@ namespace Minitimer {
         }
 
         private void OnMouseDoubleClick(object sender, MouseEventArgs e) {
+            AddTime(30);
+        }
+
+        private void AddTime(double time) {
             var now = DateTime.Now;
-            if (now > Deadline) {
-                Deadline = now + TimeSpan.FromSeconds(30);
-            } else {
-                Deadline += TimeSpan.FromSeconds(30);
+            if (time > 0 && now > Deadline) {
+                Deadline = now + TimeSpan.FromSeconds(time);
+            } else if (time > 0 || Deadline > now) {
+                Deadline += TimeSpan.FromSeconds(time);
             }
             DoUpdate();
-            timer1.Start();
+            if (Deadline > now) {
+                timer1.Start();
+            } else {
+                SystemSounds.Beep.Play();
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e) {
@@ -128,6 +136,10 @@ namespace Minitimer {
         private void Form1_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Escape) {
                 Close();
+            } else if (e.KeyCode == Keys.Space) {
+                AddTime(1);
+            } else if (e.KeyCode == Keys.Back) {
+                AddTime(-1);
             }
         }
 
