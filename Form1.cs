@@ -94,9 +94,11 @@ namespace Minitimer {
 
         private void PaintTimer(string value) {
             graphics.Graphics.FillRectangle(SystemBrushes.ControlText, 0, 0, Width, Height);
-            graphics.Graphics.FillRectangle(SystemBrushes.Control, BorderSize, BorderSize, Width - BorderSize * 2, Height - BorderSize * 2);
-            graphics.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-            graphics.Graphics.DrawString(value, TextFont, SystemBrushes.ControlText, BorderSize, BorderSize);
+            var textBound = new Rectangle(BorderSize, BorderSize, Width - BorderSize * 2, Height - BorderSize * 2);
+            graphics.Graphics.FillRectangle(SystemBrushes.Control, textBound);
+            graphics.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            TextRenderer.DrawText(graphics.Graphics, value, TextFont, textBound, SystemColors.ControlText, Color.Transparent,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
             graphics.Render(Graphics.FromHwnd(Handle));
             //Refresh();
         }
@@ -159,7 +161,8 @@ namespace Minitimer {
 
         private void UpdateFont() {
             TextFont = new Font(FontFamily.GenericSansSerif, TextFontSize, GraphicsUnit.Point);
-            var contentSize = Graphics.FromHwnd(Handle).MeasureString(TimeLabel, TextFont).ToSize();
+            var contentSize = TextRenderer.MeasureText(TimeLabel, TextFont, Size.Empty,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
             contentSize.Width += BorderSize * 2;
             contentSize.Height += BorderSize * 2;
             Size = SizeFromClientSize(contentSize);
