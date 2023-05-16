@@ -85,7 +85,7 @@
             this.Deactivate += new System.EventHandler(this.Form1_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.DpiChanged += new System.Windows.Forms.DpiChangedEventHandler(this.Form1_DpiChanged);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnKeyDown);
             this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseDoubleClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnMouseDown);
             this.Resize += new System.EventHandler(this.Form1_Resize);

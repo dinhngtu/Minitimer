@@ -1,49 +1,27 @@
 using Minitimer.Properties;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Media;
-using System.Reflection.Emit;
-using System.Runtime.Remoting.Contexts;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
 namespace Minitimer {
     public partial class Form1 : Form {
-        DateTime Deadline { get; set; } = DateTime.MinValue;
-
-
         const string DefaultTimeLabel = "00:00";
-        string TimeLabel { get; set; } = DefaultTimeLabel;
 
-        float TextFontSize {
-            get {
-                return 48.0f * DeviceDpi / 96.0f;
-            }
-        }
-
-        int BorderSize {
-            get {
-                return (int)Math.Ceiling(2.0f * DeviceDpi / 96.0f);
-            }
-        }
-
-        Font TextFont;
+        DateTime deadline = DateTime.MinValue;
+        string timeLabel = DefaultTimeLabel;
+        int borderSize;
+        float textFontSize;
+        Font textFont;
         readonly BufferedGraphicsContext graphicsContext = BufferedGraphicsManager.Current;
         BufferedGraphics graphics = null;
 
         public Form1() {
             InitializeComponent();
-            UpdateFont();
+            UpdateSizes();
             RepositionForm();
             RecreateBuffer();
-            PaintTimer(TimeLabel);
+            DoPaint();
         }
 
         private void RepositionForm() {
@@ -82,13 +60,13 @@ namespace Minitimer {
 
         private void AddTime(double time) {
             var now = DateTime.Now;
-            if (time > 0 && now > Deadline) {
-                Deadline = now + TimeSpan.FromSeconds(time);
-            } else if (time > 0 || Deadline > now) {
-                Deadline += TimeSpan.FromSeconds(time);
+            if (time > 0 && now > deadline) {
+                deadline = now + TimeSpan.FromSeconds(time);
+            } else if (time > 0 || deadline > now) {
+                deadline += TimeSpan.FromSeconds(time);
             }
             DoUpdate();
-            if (Deadline > now) {
+            if (deadline > now) {
                 timer1.Start();
             } else {
                 SystemSounds.Beep.Play();
@@ -99,26 +77,26 @@ namespace Minitimer {
             DoUpdate();
         }
 
-        private void PaintTimer(string value) {
+        private void DoPaint() {
             var g = graphics.Graphics;
             g.FillRectangle(SystemBrushes.ControlText, 0, 0, Width, Height);
-            var textBound = new Rectangle(BorderSize, BorderSize, Width - BorderSize * 2, Height - BorderSize * 2);
+            var textBound = new Rectangle(borderSize, borderSize, Width - borderSize * 2, Height - borderSize * 2);
             g.FillRectangle(SystemBrushes.Control, textBound);
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-            TextRenderer.DrawText(g, value, TextFont, textBound, SystemColors.ControlText, Color.Transparent,
+            TextRenderer.DrawText(g, timeLabel, textFont, textBound, SystemColors.ControlText, Color.Transparent,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
             Invalidate();
         }
 
         private void DoUpdate() {
             var now = DateTime.Now;
-            if (Deadline > now) {
-                var rem = TimeSpan.FromSeconds(Math.Ceiling((Deadline - now).TotalSeconds));
-                TimeLabel = rem.ToString("mm\\:ss");
-                PaintTimer(TimeLabel);
+            if (deadline > now) {
+                var rem = TimeSpan.FromSeconds(Math.Ceiling((deadline - now).TotalSeconds));
+                timeLabel = rem.ToString("mm\\:ss");
+                DoPaint();
             } else {
-                TimeLabel = DefaultTimeLabel;
-                PaintTimer(TimeLabel);
+                timeLabel = DefaultTimeLabel;
+                DoPaint();
                 if (timer1.Enabled) {
                     timer1.Stop();
                     SystemSounds.Beep.Play();
@@ -133,7 +111,7 @@ namespace Minitimer {
             Close();
         }
 
-        private void Form1_KeyDown(object sender, KeyEventArgs e) {
+        private void OnKeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Escape) {
                 Close();
             } else if (e.KeyCode == Keys.Space) {
@@ -149,7 +127,7 @@ namespace Minitimer {
 
         private void Form1_Resize(object sender, EventArgs e) {
             RecreateBuffer();
-            PaintTimer(TimeLabel);
+            DoPaint();
         }
 
         private void RecreateBuffer() {
@@ -163,15 +141,17 @@ namespace Minitimer {
         }
 
         private void Form1_DpiChanged(object sender, DpiChangedEventArgs e) {
-            UpdateFont();
+            UpdateSizes();
         }
 
-        private void UpdateFont() {
-            TextFont = new Font(FontFamily.GenericSansSerif, TextFontSize, GraphicsUnit.Point);
-            var contentSize = TextRenderer.MeasureText(TimeLabel, TextFont, Size.Empty,
+        private void UpdateSizes() {
+            borderSize = (int)Math.Ceiling(2.0f * (DeviceDpi / 96.0f));
+            textFontSize = 48.0f * (DeviceDpi / 96.0f);
+            textFont = new Font(FontFamily.GenericSansSerif, textFontSize, GraphicsUnit.Point);
+            var contentSize = TextRenderer.MeasureText(timeLabel, textFont, Size.Empty,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-            contentSize.Width += BorderSize * 2;
-            contentSize.Height += BorderSize * 2;
+            contentSize.Width += borderSize * 2;
+            contentSize.Height += borderSize * 2;
             Size = SizeFromClientSize(contentSize);
         }
 
