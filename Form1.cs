@@ -40,11 +40,10 @@ namespace Minitimer {
 
         public Form1() {
             InitializeComponent();
-            SetStyle(ControlStyles.UserPaint, true);
-            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             UpdateFont();
             RepositionForm();
             RecreateBuffer();
+            PaintTimer(TimeLabel);
         }
 
         private void RepositionForm() {
@@ -93,14 +92,14 @@ namespace Minitimer {
         }
 
         private void PaintTimer(string value) {
-            graphics.Graphics.FillRectangle(SystemBrushes.ControlText, 0, 0, Width, Height);
+            var g = graphics.Graphics;
+            g.FillRectangle(SystemBrushes.ControlText, 0, 0, Width, Height);
             var textBound = new Rectangle(BorderSize, BorderSize, Width - BorderSize * 2, Height - BorderSize * 2);
-            graphics.Graphics.FillRectangle(SystemBrushes.Control, textBound);
-            graphics.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-            TextRenderer.DrawText(graphics.Graphics, value, TextFont, textBound, SystemColors.ControlText, Color.Transparent,
+            g.FillRectangle(SystemBrushes.Control, textBound);
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            TextRenderer.DrawText(g, value, TextFont, textBound, SystemColors.ControlText, Color.Transparent,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-            graphics.Render(Graphics.FromHwnd(Handle));
-            //Refresh();
+            Invalidate();
         }
 
         private void DoUpdate() {
@@ -138,7 +137,7 @@ namespace Minitimer {
 
         private void Form1_Resize(object sender, EventArgs e) {
             RecreateBuffer();
-            DoUpdate();
+            PaintTimer(TimeLabel);
         }
 
         private void RecreateBuffer() {
@@ -149,10 +148,6 @@ namespace Minitimer {
                 graphics = null;
             }
             graphics = graphicsContext.Allocate(this.CreateGraphics(), new Rectangle(0, 0, this.Width, this.Height));
-        }
-
-        private void Form1_Paint(object sender, PaintEventArgs e) {
-            PaintTimer(TimeLabel);
         }
 
         private void Form1_DpiChanged(object sender, DpiChangedEventArgs e) {
@@ -166,6 +161,10 @@ namespace Minitimer {
             contentSize.Width += BorderSize * 2;
             contentSize.Height += BorderSize * 2;
             Size = SizeFromClientSize(contentSize);
+        }
+
+        protected override void OnPaint(PaintEventArgs e) {
+            graphics.Render(e.Graphics);
         }
     }
 }
