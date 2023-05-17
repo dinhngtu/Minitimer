@@ -146,7 +146,7 @@ namespace Minitimer {
 
         private void UpdateSizes() {
             borderSize = (int)Math.Ceiling(2.0f * (DeviceDpi / 96.0f));
-            textFontSize = 48.0f * (DeviceDpi / 96.0f);
+            textFontSize = Settings.Default.TextSize * (DeviceDpi / 96.0f);
             textFont = new Font(FontFamily.GenericSansSerif, textFontSize, GraphicsUnit.Point);
             var contentSize = TextRenderer.MeasureText(timeLabel, textFont, Size.Empty,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
@@ -157,6 +157,30 @@ namespace Minitimer {
 
         protected override void OnPaint(PaintEventArgs e) {
             graphics.Render(e.Graphics);
+        }
+
+        private void smallToolStripMenuItem_Click(object sender, EventArgs e) {
+            Settings.Default.TextSize = 32.0f;
+            UpdateSizes();
+            if (!Screen.FromControl(this).Bounds.Contains(Bounds)) {
+                RepositionForm();
+            }
+        }
+
+        private void mediumToolStripMenuItem_Click(object sender, EventArgs e) {
+            Settings.Default.TextSize = 48.0f;
+            UpdateSizes();
+            if (!Screen.FromControl(this).Bounds.Contains(Bounds)) {
+                RepositionForm();
+            }
+        }
+
+        private void largeToolStripMenuItem_Click(object sender, EventArgs e) {
+            Settings.Default.TextSize = 64.0f;
+            UpdateSizes();
+            if (!Screen.FromControl(this).Bounds.Contains(Bounds)) {
+                RepositionForm();
+            }
         }
     }
 }

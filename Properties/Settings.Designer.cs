@@ -34,5 +34,17 @@ namespace Minitimer.Properties {
                 this["CloseOnFinish"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("48")]
+        public float TextSize {
+            get {
+                return ((float)(this["TextSize"]));
+            }
+            set {
+                this["TextSize"] = value;
+            }
+        }
     }
 }

@@ -1,3 +1,4 @@
+using Minitimer.Properties;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,6 +20,7 @@ namespace Minitimer {
                 }
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                Settings.Default.Upgrade();
                 Application.Run(new Form1());
             }
         }
