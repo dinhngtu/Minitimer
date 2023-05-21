@@ -59,12 +59,13 @@ namespace Minitimer {
         }
 
         private void AddTime(double time) {
+            timer1.Stop();
             var now = DateTime.Now;
-            if (time > 0 && now > deadline) {
-                deadline = now + TimeSpan.FromSeconds(time);
-            } else if (time > 0 || deadline > now) {
-                deadline += TimeSpan.FromSeconds(time);
+            var rem = deadline - now;
+            if (rem < TimeSpan.Zero) {
+                rem = TimeSpan.Zero;
             }
+            deadline = now + TimeSpan.FromSeconds(Math.Ceiling(rem.TotalSeconds) + time);
             DoUpdate();
             if (deadline > now) {
                 timer1.Start();
