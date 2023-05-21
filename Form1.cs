@@ -1,6 +1,7 @@
 using Minitimer.Properties;
 using System;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Media;
 using System.Windows.Forms;
 
@@ -19,16 +20,26 @@ namespace Minitimer {
         public Form1() {
             InitializeComponent();
             UpdateSizes();
-            RepositionForm();
+            RepositionForm(true);
             RecreateBuffer();
             DoPaint();
         }
 
-        private void RepositionForm() {
+        private void RepositionForm(bool force) {
+            SuspendLayout();
             var currentScreen = Screen.FromControl(this);
-            var realX = currentScreen.WorkingArea.Width - Width - LogicalToDeviceUnits(8);
-            var realY = currentScreen.WorkingArea.Height - Height - LogicalToDeviceUnits(8);
-            Location = new Point(realX, realY);
+            var x = Location.X;
+            var rx = currentScreen.WorkingArea.Width - Width - LogicalToDeviceUnits(8);
+            if (force || x + Width > rx) {
+                x = rx;
+            }
+            var y = Location.Y;
+            var ry = currentScreen.WorkingArea.Height - Height - LogicalToDeviceUnits(8);
+            if (force || y + Height > ry) {
+                y = ry;
+            }
+            Location = new Point(x, y);
+            ResumeLayout();
         }
 
         private void OnMouseDown(object sender, MouseEventArgs e) {
@@ -163,25 +174,19 @@ namespace Minitimer {
         private void smallToolStripMenuItem_Click(object sender, EventArgs e) {
             Settings.Default.TextSize = 32.0f;
             UpdateSizes();
-            if (!Screen.FromControl(this).Bounds.Contains(Bounds)) {
-                RepositionForm();
-            }
+            RepositionForm(false);
         }
 
         private void mediumToolStripMenuItem_Click(object sender, EventArgs e) {
             Settings.Default.TextSize = 48.0f;
             UpdateSizes();
-            if (!Screen.FromControl(this).Bounds.Contains(Bounds)) {
-                RepositionForm();
-            }
+            RepositionForm(false);
         }
 
         private void largeToolStripMenuItem_Click(object sender, EventArgs e) {
             Settings.Default.TextSize = 64.0f;
             UpdateSizes();
-            if (!Screen.FromControl(this).Bounds.Contains(Bounds)) {
-                RepositionForm();
-            }
+            RepositionForm(false);
         }
     }
 }
