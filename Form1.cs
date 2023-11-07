@@ -127,9 +127,15 @@ namespace Minitimer {
             if (e.KeyCode == Keys.Escape) {
                 Close();
             } else if (e.KeyCode == Keys.Space) {
-                AddTime(1);
+                if (e.Control)
+                    AddTime(60);
+                else
+                    AddTime(1);
             } else if (e.KeyCode == Keys.Back) {
-                AddTime(-1);
+                if (e.Control)
+                    AddTime(-60);
+                else
+                    AddTime(-1);
             }
         }
 
