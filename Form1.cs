@@ -106,7 +106,11 @@ namespace Minitimer {
             if (rem < TimeSpan.Zero) {
                 rem = TimeSpan.Zero;
             }
-            deadline = now + TimeSpan.FromSeconds(Math.Ceiling(rem.TotalSeconds) + time);
+            rem += TimeSpan.FromSeconds(time);
+            if (rem > TimeSpan.FromSeconds(3599.0)) {
+                rem = TimeSpan.FromSeconds(3599.0);
+            }
+            deadline = now + TimeSpan.FromSeconds(Math.Ceiling(rem.TotalSeconds));
             DoUpdate();
             if (deadline > now) {
                 timer1.Start();
