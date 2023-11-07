@@ -20,12 +20,17 @@ namespace Minitimer {
         BufferedGraphics graphics = null;
 
         readonly WaveOutEvent waveOut = new WaveOutEvent();
-        readonly ConcurrentQueue<Action> onPlaybackStoppedActions = new ConcurrentQueue<Action>();
         readonly ISampleProvider sound = MakeSound();
+
+        Color backgroundColor = SystemColors.Control;
+        Color foregroundColor = SystemColors.ControlText;
+        readonly ConcurrentStack<Action> effectDoneActions = new ConcurrentStack<Action>();
+        event EventHandler OnEffectDone;
+        readonly System.Timers.Timer effectTimer = new System.Timers.Timer(1500.0) { AutoReset = true };
 
         public Form1() {
             InitializeComponent();
-            waveOut.PlaybackStopped += OnPlaybackStopped;
+            effectTimer.Elapsed += EffectTimer_Elapsed;
             UpdateSizes();
             RepositionForm(true);
             RecreateBuffer();
@@ -89,13 +94,21 @@ namespace Minitimer {
             return begin;
         }
 
-        private void PlaySound() {
-            waveOut.Init(sound);
-            waveOut.Play();
+        private void SwapColors() {
+            (backgroundColor, foregroundColor) = (foregroundColor, backgroundColor);
+            DoPaint();
         }
 
-        private void OnPlaybackStopped(object sender, StoppedEventArgs e) {
-            while (onPlaybackStoppedActions.TryDequeue(out var action))
+        private void DoEffect() {
+            SwapColors();
+            effectDoneActions.Push(SwapColors);
+            waveOut.Init(sound);
+            waveOut.Play();
+            effectTimer.Start();
+        }
+
+        private void EffectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
+            while (effectDoneActions.TryPop(out var action))
                 this.Invoke(action);
         }
 
@@ -125,11 +138,11 @@ namespace Minitimer {
 
         private void DoPaint() {
             var g = graphics.Graphics;
-            g.FillRectangle(SystemBrushes.ControlText, 0, 0, Width, Height);
+            g.FillRectangle(new SolidBrush(foregroundColor), 0, 0, Width, Height);
             var textBound = new Rectangle(borderSize, borderSize, Width - borderSize * 2, Height - borderSize * 2);
-            g.FillRectangle(SystemBrushes.Control, textBound);
+            g.FillRectangle(new SolidBrush(backgroundColor), textBound);
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-            TextRenderer.DrawText(g, timeLabel, textFont, textBound, SystemColors.ControlText, Color.Transparent,
+            TextRenderer.DrawText(g, timeLabel, textFont, textBound, foregroundColor, Color.Transparent,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
             Invalidate();
         }
@@ -142,13 +155,14 @@ namespace Minitimer {
                 DoPaint();
             } else {
                 timeLabel = DefaultTimeLabel;
-                DoPaint();
                 if (timer1.Enabled) {
                     timer1.Stop();
-                    if (Settings.Default.CloseOnFinish) {
-                        onPlaybackStoppedActions.Enqueue(() => Close());
-                    }
-                    PlaySound();
+                    if (Settings.Default.CloseOnFinish)
+                        effectDoneActions.Push(() => Close());
+                    // DoEffect should repaint
+                    DoEffect();
+                } else {
+                    DoPaint();
                 }
             }
         }
