@@ -18,13 +18,14 @@ namespace Minitimer {
         Font textFont;
         readonly BufferedGraphicsContext graphicsContext = BufferedGraphicsManager.Current;
         BufferedGraphics graphics = null;
-        WaveOutEvent wo = new WaveOutEvent();
-        ConcurrentQueue<Action> onPlaybackStoppedActions = new ConcurrentQueue<Action>();
-        ISampleProvider sound = MakeSound();
+
+        readonly WaveOutEvent waveOut = new WaveOutEvent();
+        readonly ConcurrentQueue<Action> onPlaybackStoppedActions = new ConcurrentQueue<Action>();
+        readonly ISampleProvider sound = MakeSound();
 
         public Form1() {
             InitializeComponent();
-            wo.PlaybackStopped += OnPlaybackStopped;
+            waveOut.PlaybackStopped += OnPlaybackStopped;
             UpdateSizes();
             RepositionForm(true);
             RecreateBuffer();
@@ -89,8 +90,8 @@ namespace Minitimer {
         }
 
         private void PlaySound() {
-            wo.Init(sound);
-            wo.Play();
+            waveOut.Init(sound);
+            waveOut.Play();
         }
 
         private void OnPlaybackStopped(object sender, StoppedEventArgs e) {
