@@ -1,7 +1,9 @@
 using Minitimer.Properties;
+using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using System;
+using System.Collections.Concurrent;
 using System.Drawing;
-using System.Drawing.Text;
 using System.Media;
 using System.Windows.Forms;
 
@@ -16,9 +18,13 @@ namespace Minitimer {
         Font textFont;
         readonly BufferedGraphicsContext graphicsContext = BufferedGraphicsManager.Current;
         BufferedGraphics graphics = null;
+        WaveOutEvent wo = new WaveOutEvent();
+        ConcurrentQueue<Action> onPlaybackStoppedActions = new ConcurrentQueue<Action>();
+        ISampleProvider sound = MakeSound();
 
         public Form1() {
             InitializeComponent();
+            wo.PlaybackStopped += OnPlaybackStopped;
             UpdateSizes();
             RepositionForm(true);
             RecreateBuffer();
@@ -69,6 +75,29 @@ namespace Minitimer {
             AddTime(30);
         }
 
+        private static ISampleProvider MakeSound() {
+            var beep = new SignalGenerator() {
+                Type = SignalGeneratorType.Triangle,
+                Frequency = 2000,
+                Gain = 1.0,
+            };
+            var silence = new SilenceProvider(beep.WaveFormat).ToSampleProvider();
+            var begin = beep.Take(TimeSpan.FromMilliseconds(80.0));
+            for (int i = 0; i < 2; i++)
+                begin = begin.FollowedBy(silence.Take(TimeSpan.FromMilliseconds(40.0))).FollowedBy(beep.Take(TimeSpan.FromMilliseconds(80.0)));
+            return begin;
+        }
+
+        private void PlaySound() {
+            wo.Init(sound);
+            wo.Play();
+        }
+
+        private void OnPlaybackStopped(object sender, StoppedEventArgs e) {
+            while (onPlaybackStoppedActions.TryDequeue(out var action))
+                this.Invoke(action);
+        }
+
         private void AddTime(double time) {
             timer1.Stop();
             var now = DateTime.Now;
@@ -111,10 +140,10 @@ namespace Minitimer {
                 DoPaint();
                 if (timer1.Enabled) {
                     timer1.Stop();
-                    SystemSounds.Beep.Play();
                     if (Settings.Default.CloseOnFinish) {
-                        Close();
+                        onPlaybackStoppedActions.Enqueue(() => Close());
                     }
+                    PlaySound();
                 }
             }
         }
